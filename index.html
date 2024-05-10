@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ESP8266 WebSocket Control</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+
+        /* Light Theme */
+        body.light {
+            background-color: #f0f0f0;
+            color: #333;
+        }
+
+        /* Dark Theme */
+        body.dark {
+            background-color: #333;
+            color: #f0f0f0;
+        }
+
+        h1, h3 {
+            text-align: center;
+            font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+            margin-top: 20px;
+        }
+
+        .container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-top: 20px;
+        }
+
+        .btn-group {
+            margin: 5px;
+        }
+
+        .direction-btn, .pwm-btn {
+            width: 50px;
+            height: 50px;
+            margin: 5px;
+            font-size: 20px;
+            font-weight: bold;
+            border-radius: 5px;
+            border: 2px solid #333;
+            background-color: #4CAF50;
+            color: white;
+            cursor: pointer;
+        }
+        .direction-btn:hover, .pwm-btn:hover {
+            background-color: #45a049;
+        }
+
+        .ip-input {
+            margin-top: 20px;
+            padding: 5px;
+            font-size: 16px;
+            border-radius: 5px;
+            border: 1px solid #333;
+            width: 200px;
+            text-align: center;
+        }
+
+        #pwmDisplay {
+            margin-top: 10px;
+            font-size: 16px;
+        }
+
+        #pwmValue {
+            font-weight: bold;
+            color: #4CAF50;
+        }
+
+        /* Toggle Button */
+        .toggle-btn {
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+
+        .toggle-btn:hover {
+            background-color: #45a049;
+        }
+
+        /* Status Indicator */
+        #statusIndicator {
+            font-size: 16px;
+            font-weight: bold;
+            margin-top: 10px;
+        }
+
+        .connected {
+            color: #4CAF50;
+        }
+
+        .disconnected {
+            color: #F44336;
+        }
+
+    </style>
+</head>
+<body class="light">
+    <h1>ESP8266 WebSocket Control</h1>
+    <div class="container">
+        <input type="text" id="ipAddress" class="ip-input" placeholder="Enter ESP8266 IP address">
+    </div>
+    <div class="container">
+        <div class="btn-group">
+            <button class="direction-btn" id="DFLTBtn">&#8598;</button>
+            <button class="direction-btn" id="FWDBtn">&#8593;</button>
+            <button class="direction-btn" id="DFRTBtn">&#8599;</button>
+        </div>
+        <div class="btn-group">
+            <button class="direction-btn" id="LTBtn">&#8592;</button>
+            <button class="direction-btn" id="STPBtn">⏹</button>
+            <button class="direction-btn" id="RTBtn">&#8594;</button>
+        </div>
+        <div class="btn-group">
+            <button class="direction-btn" id="DWLTBtn">&#8601;</button>
+            <button class="direction-btn" id="BWDBtn">&#8595;</button>
+            <button class="direction-btn" id="DWRTBtn">&#8600;</button>
+        </div>
+    </div>
+    <h3>PWM Value</h3>
+    <div class="container">
+        <div class="btn-group">
+            <button class="pwm-btn" id="decreasePwmBtn">-</button>
+            <button class="pwm-btn" id="increasePwmBtn">+</button>
+        </div>
+    </div>
+    <div class="container">
+        <div id="pwmDisplay">PWM Value: <span id="pwmValue">100</span></div>
+    </div>
+
+    <!-- Toggle Button -->
+    <div class="container">
+        <button class="toggle-btn" id="themeToggleBtn">Toggle Theme</button>
+    </div>
+
+    <!-- Status Indicator -->
+    <div class="container">
+        <div id="statusIndicator" >Status: <span id="status" class="disconnected">Disconnected</span></div>
+    </div>
+
+    <script>
+        var ws;
+        var pwm = 100; // Initial PWM value
+        var sendingInterval;
+        var command;
+
+        function connectWebSocket(ipAddress) {
+            ws = new WebSocket("ws://" + ipAddress + ":8080");
+            ws.onopen = function() {
+                setStatus("Connected");
+            };
+            ws.onmessage = function(event) {
+                console.log("Message received: " + event.data);
+            };
+            ws.onclose = function() {
+                setStatus("Disconnected");
+            };
+        }
+
+        function sendCommand() {
+            var pwmValues = [pwm, pwm, pwm, pwm]; // Default PWM values
+            var message = command + ' ' + pwmValues.join(' ');
+            if (ws.readyState === WebSocket.OPEN) {
+                ws.send(message);
+            } else {
+                console.log("WebSocket not open");
+            }
+        }
+
+        function setStatus(status) {
+            var statusElement = document.getElementById("status");
+            statusElement.textContent = status;
+            statusElement.className = status.toLowerCase(); // Add appropriate class for styling
+        }
+
+        // Event listener for IP address input
+        document.getElementById("ipAddress").addEventListener("change", function() {
+            var ipAddress = this.value;
+            connectWebSocket(ipAddress);
+        });
+
+        // Event listeners for direction buttons
+        function setSendingInterval(btnCommand) {
+            command = btnCommand;
+            sendingInterval = setInterval(sendCommand, 100);
+        }
+
+        function clearSendingInterval() {
+            clearInterval(sendingInterval);
+        }
+
+        document.getElementById("DFLTBtn").addEventListener("mousedown", function() {
+            setSendingInterval('DFLT');
+        });
+        document.getElementById("DFLTBtn").addEventListener("mouseup", function() {
+            clearSendingInterval();
+        });
+        document.getElementById("FWDBtn").addEventListener("mousedown", function() {
+            setSendingInterval('FWD');
+        });
+        document.getElementById("FWDBtn").addEventListener("mouseup", function() {
+            clearSendingInterval();
+        });
+        document.getElementById("DFRTBtn").addEventListener("mousedown", function() {
+            setSendingInterval('DFRT');
+        });
+        document.getElementById("DFRTBtn").addEventListener("mouseup", function() {
+            clearSendingInterval();
+        });
+        document.getElementById("LTBtn").addEventListener("mousedown", function() {
+            setSendingInterval('LT');
+        });
+        document.getElementById("LTBtn").addEventListener("mouseup", function() {
+            clearSendingInterval();
+        });
+        document.getElementById("STPBtn").addEventListener("mousedown", function() {
+            setSendingInterval('STP');
+        });
+        document.getElementById("STPBtn").addEventListener("mouseup", function() {
+            clearSendingInterval();
+        });
+        document.getElementById("RTBtn").addEventListener("mousedown", function() {
+            setSendingInterval('RT');
+        });
+        document.getElementById("RTBtn").addEventListener("mouseup", function() {
+            clearSendingInterval();
+        });
+        document.getElementById("DWLTBtn").addEventListener("mousedown", function() {
+            setSendingInterval('DWLT');
+        });
+        document.getElementById("DWLTBtn").addEventListener("mouseup", function() {
+            clearSendingInterval();
+        });
+        document.getElementById("BWDBtn").addEventListener("mousedown", function() {
+            setSendingInterval('BWD');
+        });
+        document.getElementById("BWDBtn").addEventListener("mouseup", function() {
+            clearSendingInterval();
+        });
+        document.getElementById("DWRTBtn").addEventListener("mousedown", function() {
+            setSendingInterval('DWRT');
+        });
+        document.getElementById("DWRTBtn").addEventListener("mouseup", function() {
+            clearSendingInterval();
+        });
+
+        // Event listeners for PWM buttons
+        document.getElementById("increasePwmBtn").addEventListener("click", function() {
+            pwm += 10;
+            if (pwm > 255) pwm = 255;
+            document.getElementById("pwmValue").textContent = pwm;
+        });
+        document.getElementById("decreasePwmBtn").addEventListener("click", function() {
+            pwm -= 10;
+            if (pwm < 50) pwm = 50;
+            document.getElementById("pwmValue").textContent = pwm;
+        });
+
+        // Toggle Theme
+        document.getElementById("themeToggleBtn").addEventListener("click", function() {
+            document.body.classList.toggle("dark");
+        });
+
+    </script>
+</body>
+</html>
