@@ -2,6 +2,9 @@ import keyboard
 import time
 import websocket
 
+# Custom Functions
+import find_ip
+
 class KeyboardController:
     def __init__(self, ws_url):
         self.ws_url = ws_url
@@ -52,8 +55,12 @@ class KeyboardController:
 
             time.sleep(0.05)
 
-# def run(ws_url,flag=False):
+# ESP address
+esp_ip = find_ip.find_device_ip("48:55:19:f6:57:34")
+
+# To use Keyboard control
+def run(flag=False):
     # Create KeyboardController instance and run it
-    # if flag:
-controller = KeyboardController(f"ws://192.168.137.48:8080/")
-controller.run()
+    if flag:
+        controller = KeyboardController(f"ws://{esp_ip}:8080/")
+        controller.run()
