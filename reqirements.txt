@@ -1,0 +1,7 @@
+torch
+transformers
+sounddevice
+opencv-python
+mediapipe
+keyboard
+websocket-client
