@@ -3,9 +3,6 @@ import mediapipe as mp
 import math
 import websocket
 
-# Custom Functions
-import find_ip 
-
 # Global Variables 
 Camera_index = 0
 
@@ -174,12 +171,12 @@ class HandTrackingController:
         self.cap.release()
         cv2.destroyAllWindows()
 
+    def stop_gesture_tracking(self):
+        # Release resources
+        self.cap.release()
+        cv2.destroyAllWindows()
 
-# ESP address
-esp_ip = find_ip.find_device_ip("48:55:19:f6:57:34")
-
-# To use hand control
-def run(flag = False):
-    if flag:
-        handtrack = HandTrackingController(f"ws://{esp_ip}:8080/")
-        handtrack.gesture_tracking()
+        # To use hand control
+    def run(self,flag = False):
+        if flag:
+            self.gesture_tracking()
