@@ -3,9 +3,13 @@ from tkinter import messagebox
 from hand_control import HandTrackingController
 from keyboard_control import KeyboardController
 import popup_box
+import sys
 
 # Import Custom Functions
 import find_ip
+
+# Bot's IP
+esp_ip = None
 
 class ControlGUI:
     def __init__(self, esp_ip):
@@ -57,9 +61,19 @@ class ControlGUI:
             self.hand_tracking_controller.stop_gesture_tracking()
             self.root.destroy()
 
+
 if __name__ == "__main__":
+    # If Arguments given
+    if len(sys.argv) > 1:
+        esp_ip = sys.argv[1]
+    else:
+        # IF bot is connected to the laptops Hotspot, Automatic Search
+        esp_ip = find_ip.find_device_ip("48:55:19:f6:57:34")
+        if esp_ip is None:
+            print("Bot was not found. Exiting ....")
+            exit()
+            
     # ESP address
     popup_box.popup()
-    esp_ip = find_ip.find_device_ip("48:55:19:f6:57:34")
     app = ControlGUI(f"ws://{esp_ip}:8080/")
     app.root.mainloop()
