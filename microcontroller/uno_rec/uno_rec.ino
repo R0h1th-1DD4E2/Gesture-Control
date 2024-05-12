@@ -1,19 +1,19 @@
 // Driver 1
 // PWM Pins
-const int in1u = 2; 
-const int in2u = 4; 
-const int enau = 3; 
-const int in3u = 7;
-const int in4u = 8; 
-const int enbu = 5; 
+#define in1u 2
+#define in2u 4 
+#define enau 3 
+#define in3u 7
+#define in4u 8
+#define enbu 5 
 
 // Driver 2
-const int in1d = 10;
-const int in2d = 11; 
-const int enad = 6; 
-const int in3d = 12;
-const int in4d = 13; 
-const int enbd = 9;
+#define in1d 10
+#define in2d 11 
+#define enad 6 
+#define in3d 12
+#define in4d 13 
+#define enbd 9
 
 // Time
 const unsigned long commandTimeout = 5000;
@@ -75,9 +75,9 @@ void receiveCommand() {
         lastReceivedCommand = String(command);
         Serial.println(command);
       } 
-      else {
-        Serial.println("Invalid message format");
-      }
+    else {
+      Serial.println("Invalid message format");
+    }
   }
 }
 

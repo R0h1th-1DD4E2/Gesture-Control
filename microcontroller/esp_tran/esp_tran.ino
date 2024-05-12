@@ -14,7 +14,7 @@ void webSocketEvent(uint8_t num, WStype_t type, uint8_t * payload, size_t length
       Serial.printf("[%u] Disconnected!\n", num);
       break;
     case WStype_TEXT:
-      Serial.printf("[%u] get Text: %s\n", num, payload);
+      // Serial.printf("[%u] get Text: %s\n", num, payload);
 
       // Forward the received command to Arduino Uno via serial
       Serial.write(payload, length);
