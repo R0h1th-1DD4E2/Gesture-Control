@@ -12,7 +12,7 @@
 #define in2d 11 
 #define enad 6 
 #define in3d 12
-#define in4d 13 
+#define in4d A0 
 #define enbd 9
 
 // Time

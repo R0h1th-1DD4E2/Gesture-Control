@@ -17,12 +17,12 @@ const int enbu = 13;
 // Driver 2
 const int in1d = 3;
 const int in2d = 0; 
-// const int enad = 12; 
-const int in3d = 10;
+// const int enad = 2; 
+const int in3d = 15;
 const int in4d = 16; 
 // const int enbd = 13;
 
-// Time
+// Timeww
 const unsigned long commandTimeout = 5000;
 
 // Last received command time
