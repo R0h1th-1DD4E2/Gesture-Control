@@ -52,6 +52,7 @@ void loop() {
   // Check if no command received for more than 5 seconds
   if (millis() - lastReceivedCommandTime >= commandTimeout && lastReceivedCommandTime != 0 && lastReceivedCommand != "STP") {
     // move("STP", 0, 0, 0, 0); // Stop the motors if no command received for more than 5 seconds and the previous command was not STP
+    move("STP", 0, 0, 0, 0);
     lastReceivedCommand = "STP";
     Serial.println("STOP");
   }
