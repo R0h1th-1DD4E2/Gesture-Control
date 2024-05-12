@@ -65,7 +65,7 @@ void receiveCommand() {
   if (Serial.available() > 0) {
     // Read command from ESP8266
     message = Serial.readStringUntil('\n');
-    Serial.println(command);
+    Serial.println(message);
 
     if (sscanf(message.c_str(), "%s %d %d %d %d", command, &speed1, &speed2, &speed3, &speed4) == 5) {
         // Call the move function with the extracted values
@@ -73,6 +73,7 @@ void receiveCommand() {
         // Update the last received command time
         lastReceivedCommandTime = millis();
         lastReceivedCommand = String(command);
+        Serial.println(command);
       } 
       else {
         Serial.println("Invalid message format");
