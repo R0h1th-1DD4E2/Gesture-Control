@@ -18,13 +18,21 @@ const int enbu = 13;
 const int in1d = 3;
 const int in2d = 0; 
 // const int enad = 12; 
-const int in3d = 9;
+const int in3d = 10;
 const int in4d = 16; 
 // const int enbd = 13;
 
+// Time
+const unsigned long commandTimeout = 5000;
+
+// Last received command time
+unsigned long lastReceivedCommandTime = 0;
+
+// Define a variable to store the last command received
+String lastReceivedCommand = "";
+
 // Web Socket Instance
 WebSocketsServer webSocket = WebSocketsServer(8080); 
-
 
 void webSocketEvent(uint8_t num, WStype_t type, uint8_t * payload, size_t length) {
   // Define variables outside of the switch statement
@@ -41,22 +49,23 @@ void webSocketEvent(uint8_t num, WStype_t type, uint8_t * payload, size_t length
 
       // Convert the payload to a string
       message = String((char*)payload);
-      
 
       if (sscanf(message.c_str(), "%s %d %d %d %d", command, &speed1, &speed2, &speed3, &speed4) == 5) {
         // Call the move function with the extracted values
-
         move(command, speed1, speed2, speed3, speed4);
-      } else {
+        // Update the last received command time
+        lastReceivedCommandTime = millis();
+        lastReceivedCommand = String(command);
+      } 
+      else {
         Serial.println("Invalid message format");
       }
-      
+
       break;
     default:
       break;
   }
 }
-
 
 void setup() {
   Serial.begin(9600);
@@ -94,8 +103,14 @@ void loop() {
     Serial.println("WiFi connection lost. Reconnecting...");
     connectToWiFi();
   }
-}
 
+  // Check if no command received for more than 5 seconds
+  if (millis() - lastReceivedCommandTime >= commandTimeout && lastReceivedCommandTime != 0 && lastReceivedCommand != "STP") {
+    move("STP", 0, 0, 0, 0); // Stop the motors if no command received for more than 5 seconds and the previous command was not STP
+    lastReceivedCommand = "STP";
+    Serial.println("STOP");
+  }
+}
 
 void connectToWiFi() {
   // Attempt to connect to WiFi
@@ -115,9 +130,7 @@ void connectToWiFi() {
   }
 }
 
-
 void move(String command, int speed1, int speed2, int speed3, int speed4) {
-  
   analogWrite(enau, speed1);
   analogWrite(enbu, speed2);
   // analogWrite(enad, speed3);
@@ -214,18 +227,6 @@ void move(String command, int speed1, int speed2, int speed3, int speed4) {
     digitalWrite(in3d, LOW);
     digitalWrite(in4d, LOW);
   } else {
-    // Unknown command
-    // Serial.println("Command : \n");
-    // Serial.println(command);
-    // Serial.println("End Command\n");
     Serial.println("Unknown Command");
   }
 }
-/*
-char ar[5];
-switch(ar)
-{
-  case "";
-}
-*/
-
