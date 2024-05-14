@@ -3,9 +3,16 @@ from transformers import pipeline
 import sounddevice as sd
 import re
 from groq import Groq
-import threading
 import websocket
 import time
+import sys
+from dotenv import load_dotenv
+import os
+
+# Custom function 
+import find_ip
+
+load_dotenv()
 
 class VoiceModule:
     def __init__(self, websocket_url=None):
@@ -16,6 +23,7 @@ class VoiceModule:
             self.ws.connect(websocket_url)
 
         self.device = "cuda:0"
+        self.groq_key = os.getenv('GROQ_KEY')
         print(self.device)
         self.pipe = pipeline(
             "automatic-speech-recognition",
@@ -23,7 +31,7 @@ class VoiceModule:
             device=self.device,
         )
         print("Initializing Groq Client....")
-        self.client = Groq(api_key="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")
+        self.client = Groq(api_key=self.groq_key)
         print("Initialized Groq Client.")
 
     def call_llm_function(self, text="Move forward for 2 secs and take a right and move forward for 2 secs"):
@@ -77,8 +85,6 @@ class VoiceModule:
         except Exception as e:
             print(e)
             print("Error occured while calling API.")
-
-
 
 
     def record_audio(self, duration=5, sample_rate=16000):
@@ -137,6 +143,17 @@ class VoiceModule:
     def bot_llm_function(self):
         pass
 
-voice = VoiceModule(websocket_url="ws://192.168.137.91:8080/")
+
+# If Arguments given
+if len(sys.argv) > 1:
+    esp_ip = sys.argv[1]
+else:
+    # IF bot is connected to the laptops Hotspot, Automatic Search
+    esp_ip = find_ip.find_device_ip("48:55:19:f6:57:34")
+    if esp_ip is None:
+        print("Bot was not found. Exiting ....")
+        exit()
+
+voice = VoiceModule(websocket_url=f"ws://{esp_ip}:8080/")
 while True:
     voice.bot_function_string()

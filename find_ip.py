@@ -36,6 +36,7 @@ def find_device_ip(mac_address_to_find):
     for interfaces,devices in connected_devices.items():
         for ip_address, mac_address in devices.items():
             if mac_address.replace("-", ":") == mac_address_to_find:
+                print(f"Bot is connected to IP - {ip_address}")
                 return ip_address
 
     return None

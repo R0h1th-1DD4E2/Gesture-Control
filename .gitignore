@@ -1,1 +1,4 @@
+# Ignore Python Cache
 __pycache__/
+#ignore keys
+.env

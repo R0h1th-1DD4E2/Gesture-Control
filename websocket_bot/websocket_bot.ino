@@ -23,7 +23,7 @@ const int in4d = 16;
 // const int enbd = 13;
 
 // Timeww
-const unsigned long commandTimeout = 5000;
+const unsigned long commandTimeout = 1000;
 
 // Last received command time
 unsigned long lastReceivedCommandTime = 0;
@@ -226,7 +226,8 @@ void move(String command, int speed1, int speed2, int speed3, int speed4) {
     digitalWrite(in2d, HIGH);
     digitalWrite(in3d, LOW);
     digitalWrite(in4d, LOW);
-  } else {
+  } 
+  else {
     Serial.println("Unknown Command");
   }
 }
